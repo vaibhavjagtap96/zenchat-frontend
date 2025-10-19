@@ -28,15 +28,19 @@ export default function VideoChat({ show }) {
     inputAudioDevices,
     selectedInputAudioDevice,
     changeAudioInputDevice,
-    isFrontCamera, // 👈 added from context
   } = useConnectWebRtc();
+
+  const handleChangeVideoInput = (deviceId) => {
+    changeVideoInputDevice(deviceId);
+  };
+
+  const handleChangeAudioInput = (deviceId) => {
+    changeAudioInputDevice(deviceId);
+  };
 
   const [showVideoOptionTray, setShowVideoOptionTray] = useState(false);
   const [showAudioOptionTray, setShowAudioOptionTray] = useState(false);
   const isMobileDevice = window.matchMedia("(max-width: 768px)").matches;
-
-  const handleChangeVideoInput = (deviceId) => changeVideoInputDevice(deviceId);
-  const handleChangeAudioInput = (deviceId) => changeAudioInputDevice(deviceId);
 
   return (
     <div
@@ -48,20 +52,15 @@ export default function VideoChat({ show }) {
         <video
           ref={remoteVideoRef}
           autoPlay
-          playsInline
           className="absolute top-0 left-0 w-full h-full object-cover rounded-md"
         ></video>
-
         <video
           ref={localVideoRef}
           autoPlay
-          playsInline
-          className={`absolute bottom-4 left-4 md:left-3 md:bottom-4 w-48 h-36 md:w-16 md:h-24 object-cover border-2 md:border-[1px] border-white rounded-md
-            ${isFrontCamera ? "scale-x-[-1]" : ""}`} // 👈 Mirror only front camera
+          className="absolute bottom-4 left-4 md:left-3 md:bottom-4 w-48 h-36 md:w-16 md:h-24 object-cover border-2 md:border-[1px] border-white rounded-md"
         ></video>
 
         <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-4 p-2">
-          {/* Audio Controls */}
           <div className="relative flex items-center bg-gray-700 rounded-full">
             <div
               className={`${
@@ -72,7 +71,6 @@ export default function VideoChat({ show }) {
                 <ul className="bg-white px-2 py-1">
                   {inputAudioDevices?.map((device) => (
                     <li
-                      key={device.deviceId}
                       onClick={() => handleChangeAudioInput(device.deviceId)}
                       className={`text-xs w-[250px] text-left cursor-pointer my-2 ${
                         device.deviceId === selectedInputAudioDevice
@@ -105,8 +103,6 @@ export default function VideoChat({ show }) {
               {isMicrophoneActive ? <FaMicrophone /> : <BsMicMuteFill />}
             </button>
           </div>
-
-          {/* Video Controls */}
           <div className="relative flex items-center bg-gray-700 rounded-full">
             <div
               className={`${
@@ -117,7 +113,6 @@ export default function VideoChat({ show }) {
                 <ul className="bg-white px-2 py-1">
                   {inputVideoDevices?.map((device) => (
                     <li
-                      key={device.deviceId}
                       onClick={() => handleChangeVideoInput(device.deviceId)}
                       className={`text-xs w-[250px] text-left cursor-pointer my-2 ${
                         device.deviceId === selectedInputVideoDevice
@@ -150,7 +145,6 @@ export default function VideoChat({ show }) {
               {isCameraActive ? <FaVideo /> : <FaVideoSlash />}
             </button>
           </div>
-
           <button
             onClick={flipCamera}
             className="p-2 bg-white bg-opacity-40 rounded-full text-white hover:bg-opacity-50"
