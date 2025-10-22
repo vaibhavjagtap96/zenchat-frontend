@@ -42,19 +42,32 @@ export default function Chat() {
             <ChatLeftSidebar activeLeftSidebar={activeLeftSidebar} />
           </div>
           <div
-            className={`w-full md:${
-              isChatSelected && activeLeftSidebar === "recentChats"
+            className={`w-full md:${isChatSelected && activeLeftSidebar === "recentChats"
                 ? ""
                 : "hidden"
-            }`}
+              }`}
           >
             {currentSelectedChat.current?._id ? (
               <ChatsSection />
             ) : (
-              <div className="h-full w-full flex items-center justify-center text-2xl text-slate-500">
-                <h1>No chat selected</h1>
+              <div className="h-full w-full flex flex-col items-center justify-center text-center bg-[#0b141a] text-white">
+                <img
+                  src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
+                  alt="WhatsApp Logo"
+                  className="w-28 mb-6 opacity-80"
+                />
+                <h1 className="text-3xl font-semibold text-gray-200 mb-2">
+                  WhatsApp Web
+                </h1>
+                <p className="text-gray-400 text-sm max-w-lg px-4 leading-relaxed">
+                  Send and receive messages without keeping your phone online.
+                  Use WhatsApp on up to 4 linked devices and 1 phone at the same time.
+                </p>
+                <hr className="w-1/3 border-[#2a3942] mt-8" />
+                <p className="text-gray-500 text-sm mt-4">No Chat Selected</p>
               </div>
             )}
+
           </div>
         </div>
       </div>
