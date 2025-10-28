@@ -1,75 +1,64 @@
 import moment from "moment";
-import { profile } from "../assets";
 import { useAuth } from "../context/AuthContext";
 import { getChatObjectMetadata, limitChar } from "../utils";
 
 export default function RecentUserChatCard({ chat, onClick, isActive }) {
-  // usercontext
   const { user } = useAuth();
-
-  const filteredChat = getChatObjectMetadata(chat, user); // filter the chat object metadata
+  const filteredChat = getChatObjectMetadata(chat, user); // Extract display info
 
   return (
     <div
       onClick={() => onClick(chat)}
-      className={`flex gap-2 p-4 my-1 rounded-md hover:bg-backgroundLight3  dark:hover:bg-backgroundDark1 ${
-        isActive ? "bg-backgroundLight3 dark:bg-backgroundDark1 " : ""
-      } items-center w-full cursor-pointer`}
+      className={`flex gap-3 px-4 py-3 items-center cursor-pointer transition-all 
+        ${isActive
+          ? "bg-[#d9fdd3] dark:bg-[#005c4b]"
+          : "hover:bg-[#f5f6f6] dark:hover:bg-[#2a3942]"
+        } border-b border-gray-200 dark:border-[#2a3942]`}
     >
+      {/* 🖼 Avatar / Group Profile */}
       {chat.isGroupChat ? (
-        <div className="w-12 relative h-12 mr-2 flex-shrink-0 flex justify-start items-center flex-nowrap">
-          {chat.participants.slice(0, 3).map((participant, i) => {
-            return (
-              <img
-                key={participant._id}
-                src={participant.avatarUrl}
-                loading="lazy"
-                className={`w-10 h-10  border-white rounded-full absolute outline outline-3 outline-black ${
-                  i === 0
-                    ? "left-0 z-30"
-                    : i === 1
-                    ? "left-2 z-20"
-                    : i === 2
-                    ? "left-4 z-10"
-                    : ""
-                }`}
-              />
-            );
-          })}
+        <div className="relative w-12 h-12 flex-shrink-0">
+          {chat.participants.slice(0, 3).map((participant, i) => (
+            <img
+              key={participant._id}
+              src={participant.avatarUrl}
+              alt={participant.username}
+              loading="lazy"
+              className={`w-10 h-10 rounded-full border-2 border-white absolute object-cover
+                ${i === 0 ? "left-0 z-30" : i === 1 ? "left-3 z-20" : "left-6 z-10"}`}
+            />
+          ))}
         </div>
       ) : (
         <img
-          className="size-12 rounded-full object-cover"
           src={filteredChat.avatar}
-          alt=""
+          alt={filteredChat.title}
           loading="lazy"
+          className="w-12 h-12 rounded-full object-cover flex-shrink-0"
         />
       )}
 
-      <div className=" w-full">
-        <div
-          className="flex items-center
-        justify-between"
-        >
-          <div>
-            <p className="font-medium text-base text-slate-700 dark:text-slate-100">
-              {filteredChat.title}
-            </p>
-          </div>
-          <div className="font-light text-xs text-slate-500 dark:text-slate-400">
+      {/* 💬 Chat Details */}
+      <div className="flex-1 min-w-0 border-b border-gray-100 dark:border-[#2a3942] pb-1">
+        <div className="flex items-center justify-between">
+          <p className="font-medium text-[15px] text-gray-900 dark:text-gray-100 truncate">
+            {filteredChat.title}
+          </p>
+          <span className="text-xs text-gray-500 dark:text-gray-400">
             {chat.lastMessage
-              ? moment(chat.lastMessage?.createdAt)
-                  .add("TIME_ZONE", "hours")
-                  .fromNow(true) + " ago"
-              : ""}{" "}
-          </div>
+              ? moment(chat.lastMessage.createdAt).fromNow(true) + " ago"
+              : ""}
+          </span>
         </div>
-        <div className=" w-full flex items-center justify-between">
-          <div className="text-sm text-slate-500 dark:text-slate-400">
-            {limitChar(filteredChat.lastMessage, 25)}
-          </div>
-          {/* <span className="rounded-full size-5 text-center content-center text-xs bg-secondary bg-opacity-20 shadow-md dark:text-white">
-            3
+
+        <div className="flex items-center justify-between mt-0.5">
+          <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
+            {limitChar(filteredChat.lastMessage, 28) || "No messages yet"}
+          </p>
+
+          {/* Optional unread badge (activate when you have message count) */}
+          {/* <span className="text-xs bg-[#25D366] text-white rounded-full px-2 py-[1px] ml-2 shadow-sm">
+            2
           </span> */}
         </div>
       </div>
