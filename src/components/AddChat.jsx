@@ -7,7 +7,8 @@ import {
   Switch,
 } from "@headlessui/react";
 import { Fragment, useRef, useState } from "react";
-import { BiSearch, RxCross2 } from "react-icons/bi";
+import { BiSearch } from "react-icons/bi";
+import { RxCross2 } from "react-icons/rx";
 import { profile2 } from "../assets";
 import {
   createOneToOneChat,
