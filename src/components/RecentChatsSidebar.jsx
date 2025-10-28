@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { BiSearchAlt2 } from "react-icons/bi";
+import { BiSearch } from "../assets";
 import { LocalStorage } from "../utils";
 import { useChat } from "../context/ChatContext";
 import RecentUserChatCard from "./RecentUserChatCard";
@@ -30,10 +30,15 @@ export default function RecentChatsSidebar() {
     } else {
       setFilteredRecentUserChats(
         currentUserChats.filter((chat) => {
-          if (chat?.isGroupChat) return usernameRegex.test(chat.name);
-          return chat.participants.some(
-            (p) => p._id !== user._id && usernameRegex.test(p.username)
-          );
+          if (chat?.isGroupChat) {
+            return usernameRegex.test(chat.name);
+          } else {
+            return chat.participants.some((participant) => {
+              if (participant._id === user._id) return false;
+
+              return usernameRegex.test(participant.username);
+            });
+          }
         })
       );
     }
@@ -44,64 +49,67 @@ export default function RecentChatsSidebar() {
   }, [currentUserChats]);
 
   useEffect(() => {
+    // fetch the current user chats
     getCurrentUserChats();
   }, []);
 
   return (
     <div
-      className={`w-full h-full md:${isChatSelected ? "hidden" : "block"} 
-      bg-[#f0f2f5] dark:bg-[#111b21] flex flex-col transition-all duration-300`}
+      className={` px-5 py-6 md:p-2 w-full h-full md:${
+        isChatSelected ? "hidden" : "block"
+      }`}
     >
-      {/* 🔝 Header */}
-      <div className="flex flex-col p-4 border-b border-gray-300 dark:border-[#2a3942] bg-[#f0f2f5]/90 dark:bg-[#202c33]/90 backdrop-blur-md">
-        <h1 className="text-lg font-semibold text-[#008069] dark:text-[#25D366] select-none">
-          Chats
+      <div className="top">
+        <h1 className="text-black font-medium text-xl dark:text-white">
+          Recent chats
         </h1>
-
-        {/* 🔍 Search Bar */}
-        <div className="flex items-center mt-3 bg-white dark:bg-[#2a3942] rounded-full px-3 py-2 shadow-sm focus-within:ring-1 focus-within:ring-[#25D366] transition-all">
-          <BiSearchAlt2 className="text-gray-500 dark:text-gray-300 text-xl" />
+        <div
+          className="flex
+          items-center gap-1 bg-backgroundLight3 dark:bg-backgroundDark1 dark:text-slate-300 p-3 rounded-md my-5"
+        >
+          <div className="text-xl">
+            <BiSearch />
+          </div>
           <input
             type="text"
             onChange={getFilteredRecentChats}
-            placeholder="Search or start new chat"
-            className="bg-transparent outline-none px-3 text-sm w-full text-gray-800 dark:text-gray-200 placeholder-gray-500"
+            className="bg-transparent outline-none px-2 w-[90%]"
+            placeholder="Search for chats..."
           />
         </div>
-      </div>
 
-      {/* 💬 Chat List */}
-      <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-[#374045]">
         {loadingChats ? (
-          <div className="flex justify-center items-center h-[calc(100vh-200px)]">
+          <div className="flex justify-center items-center h-[calc(100vh-170px)]">
             <Loading />
           </div>
         ) : currentUserChats?.length === 0 ? (
-          <div className="flex justify-center items-center h-[calc(100vh-200px)]">
-            <h1 className="text-lg text-gray-500 dark:text-gray-400">
-              No recent chats
+          <div className="flex justify-center items-center h-52">
+            <h1 className="text-2xl text-slate-400 dark:text-slate-500">
+              No Recent chats
             </h1>
           </div>
         ) : (
-          filteredRecentUserChats?.map((chat) => (
-            <div
-              key={chat._id}
-              className="mx-2 mt-1"
-              onClick={() => {
-                if (currentSelectedChat.current?._id === chat?._id) return;
-                LocalStorage.set("currentSelectedChat", chat);
-                currentSelectedChat.current = chat;
-                setIsChatSelected(true);
-                setMessages([]);
-                getMessages(currentSelectedChat.current?._id);
-              }}
-            >
+          <div className="recentUserChats overflow-auto max-h-[calc(100vh-170px)] md:h-[calc(100vh-280px)]">
+            {filteredRecentUserChats?.map((chat) => (
               <RecentUserChatCard
+                key={chat._id}
                 chat={chat}
                 isActive={currentSelectedChat.current?._id === chat._id}
+                onClick={(chat) => {
+                  if (
+                    currentSelectedChat.current?._id &&
+                    currentSelectedChat.current?._id === chat?._id
+                  )
+                    return;
+                  LocalStorage.set("currentSelectedChat", chat);
+                  currentSelectedChat.current = chat;
+                  setIsChatSelected(true);
+                  setMessages([]);
+                  getMessages(currentSelectedChat.current?._id);
+                }}
               />
-            </div>
-          ))
+            ))}
+          </div>
         )}
       </div>
     </div>

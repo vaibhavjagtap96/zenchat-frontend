@@ -1,119 +1,53 @@
-import React, { useEffect, useState } from "react";
-import { LuUser } from "react-icons/lu";
-import { PiChats } from "react-icons/pi";
-import { RiUserSearchLine, RiLogoutBoxLine } from "react-icons/ri";
+import React from "react";
+import { LuUser, PiChats, RiUserSearchLine, logo, profile } from "../assets";
 import ThemeSwitchButton from "../components/ThemeSwitchButton";
 import { useAuth } from "../context/AuthContext";
-
 export default function SideMenu({ activeLeftSidebar, setActiveLeftSidebar }) {
-  const { logout, user } = useAuth();
-  const [isDarkMode, setIsDarkMode] = useState(false);
-
   const sideMenuOptions = [
-    { Icon: PiChats, name: "recentChats", label: "Chats" },
-    { Icon: RiUserSearchLine, name: "searchUser", label: "Search" },
-    { Icon: LuUser, name: "profile", label: "Profile" },
+    { Icon: LuUser, name: "profile" },
+    { Icon: PiChats, name: "recentChats" },
+    { Icon: RiUserSearchLine, name: "searchUser" },
   ];
 
-  // Apply dark/light theme globally
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [isDarkMode]);
+  const { logout, user } = useAuth();
 
   return (
-    <div
-      className={`h-full w-[85px] flex flex-col justify-between items-center py-6 
-        border-r shadow-[2px_0_10px_rgba(0,0,0,0.05)] transition-all duration-300
-        ${
-          isDarkMode
-            ? "bg-gradient-to-b from-[#111b21] to-[#1f2c33] border-[#2a3942]"
-            : "bg-gradient-to-b from-[#f9fafb] to-[#eef1f5] border-gray-200"
-        }`}
-    >
-      {/* --- Top: Avatar --- */}
-      <div className="flex flex-col items-center gap-4">
-        <img
-          src={
-            user?.avatarUrl ||
-            "https://cdn-icons-png.flaticon.com/512/847/847969.png"
-          }
-          alt="User Avatar"
-          title={user?.username}
-          className="w-12 h-12 rounded-full border border-[#00A884]/40 object-cover 
-                     shadow-md hover:shadow-lg hover:scale-105 cursor-pointer 
-                     transition-transform duration-300"
-        />
+    <div className="side-menu h-full md:w-full md:h-[60px] md:px-4 w-[75px] flex flex-col items-center justify-between py-5 border-r-2 dark:border-none dark:bg-backgroundDark1 md:flex-row">
+      <div className=" w-10 md:w-6 ">
+        <img src={logo} alt="zenchat" />
       </div>
-
-      {/* --- Middle: Menu --- */}
-      <ul className="flex flex-col items-center gap-8 mt-8">
-        {sideMenuOptions.map(({ Icon, name, label }, index) => (
-          <li
-            key={index}
-            onClick={() => setActiveLeftSidebar(name)}
-            className={`group relative flex flex-col items-center text-center 
-                        cursor-pointer transition-all duration-300 ${
-              name === activeLeftSidebar
-                ? "text-[#00A884]"
-                : isDarkMode
-                ? "text-gray-400 hover:text-[#00A884]"
-                : "text-gray-500 hover:text-[#00A884]"
-            }`}
-          >
-            <div
-              className={`text-3xl p-2 rounded-xl transition-all duration-300 ${
-                name === activeLeftSidebar
-                  ? "bg-[#E6F8F3] scale-110 shadow-md"
-                  : isDarkMode
-                  ? "hover:bg-[#2a3942]"
-                  : "hover:bg-[#f1f5f9]"
+      <div>
+        <ul className="flex flex-col gap-10 md:gap-8 md:flex-row">
+          {sideMenuOptions.map(({ Icon, name }, index) => (
+            <li
+              key={index}
+              className={`text-3xl  cursor-pointer hover:text-primary transition-none ${
+                name === activeLeftSidebar ? "text-primary" : "text-slate-500"
               }`}
+              onClick={() => setActiveLeftSidebar(name)}
             >
-              <Icon />
-            </div>
-            <span className="text-[11px] font-medium mt-1 opacity-80 group-hover:opacity-100">
-              {label}
-            </span>
-            {name === activeLeftSidebar && (
-              <span className="absolute left-[-10px] top-1/2 -translate-y-1/2 
-                               w-[4px] h-[26px] bg-[#00A884] rounded-r-full shadow-sm"></span>
-            )}
-          </li>
-        ))}
-      </ul>
+              <Icon key={index} />
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div className="flex flex-col gap-5 items-center md:flex-row ">
+        <div className="text-2xl md:text-md font-extrabold cursor-pointer">
+          <ThemeSwitchButton />
+        </div>
 
-      {/* --- Bottom: Theme & Logout --- */}
-      <div className="flex flex-col items-center gap-6 mt-auto">
-        <button
-          onClick={() => setIsDarkMode(!isDarkMode)}
-          title="Switch Theme"
-          className={`p-3 rounded-xl cursor-pointer transition-all duration-300 
-            hover:scale-110 active:scale-95
-            ${
-              isDarkMode
-                ? "text-gray-300 hover:text-[#00A884] hover:bg-[#2a3942]"
-                : "text-gray-600 hover:text-[#00A884] hover:bg-[#f1f5f9]"
-            }`}
-        >
-          <ThemeSwitchButton size={55} />
-        </button>
-
-        <button
+        <div
           onClick={logout}
-          title="Logout"
-          className={`p-2 rounded-xl text-gray-500 cursor-pointer transition-all duration-200 
-            ${
-              isDarkMode
-                ? "hover:text-red-400 hover:bg-[#2a3942]"
-                : "hover:text-red-500 hover:bg-[#fdecea]"
-            }`}
+          className="md:hidden text-red-500 cursor-pointer text-sm font-medium"
         >
-          <RiLogoutBoxLine size={28} />
-        </button>
+          Log out
+        </div>
+        <img
+          className="md:hidden size-10 rounded-full object-cover cursor-pointer"
+          src={user.avatarUrl}
+          alt="themeButton"
+          loading="lazy"
+        />
       </div>
     </div>
   );

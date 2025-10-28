@@ -1,81 +1,93 @@
-import { useRef } from "react";
-import { BsWhatsapp } from "react-icons/bs";
+import { RefObject, useRef } from "react";
+import { BiCoffee, BsFillChatRightTextFill } from "../assets";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function Login() {
   const userIdRef = useRef();
   const passwordRef = useRef();
+
   const { login, authError } = useAuth();
 
+  const formFields = [
+    {
+      type: "userId",
+      placeholder: "Enter your email or username",
+      ref: userIdRef,
+    },
+
+    {
+      type: "password",
+      placeholder: "Enter your password",
+      ref: passwordRef,
+    },
+  ];
+
+  // handle user login
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     const user = {
       userId: userIdRef.current.value,
       password: passwordRef.current.value,
     };
+
+    // login hook
     await login(user);
   };
 
   return (
-    <div className="flex items-center justify-center h-screen bg-[#0b141a]">
-      <div className="w-[380px] bg-[#202c33] p-8 rounded-2xl shadow-lg flex flex-col items-center gap-6">
-        {/* Logo Section */}
-        <div className="flex items-center gap-3">
-          <BsWhatsapp className="text-[#25D366] text-4xl" />
-          <h1 className="text-2xl font-semibold text-[#e9edef]">ZenChat</h1>
+    <div className="login w-full h-screen dark:bg-backgroundDark3 flex items-center justify-center">
+      <div className="l-wrapper w-[400px] flex items-center flex-col gap-5">
+        <div className=" flex items-center gap-3">
+          <div className="text-primary">
+            <BsFillChatRightTextFill />
+          </div>
+          <h1 className="text-2xl font-bold dark:text-slate-200">ZenChat</h1>
         </div>
 
-        {/* Header */}
-        <div className="text-center">
-          <h3 className="text-lg font-medium text-[#e9edef]">Sign In</h3>
-          <p className="text-sm text-[#8696a0] mt-1">
-            Continue to your account
+        <div className="flex flex-col items-center gap-1">
+          <h3 className="font-medium text-xl dark:text-slate-200">Sign In</h3>
+          <p className="text-slate-400 dark:text-slate-300">
+            Sign in your account
           </p>
         </div>
 
-        {/* Form */}
         <form
           onSubmit={handleFormSubmit}
-          className="flex flex-col gap-3 w-full"
+          className=" dark:bg-backgroundDark2 flex max-w-fit flex-col items-center  p-5 rounded-lg bg-slate-100 container-shadow "
         >
-          {authError && (
-            <p className="text-red-500 text-center text-sm">{authError}</p>
-          )}
-
-          <input
-            type="text"
-            ref={userIdRef}
-            required
-            placeholder="Email or Username"
-            className="bg-[#2a3942] text-[#e9edef] placeholder-[#8696a0] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#25D366] transition-all"
-          />
-
-          <input
-            type="password"
-            ref={passwordRef}
-            required
-            placeholder="Password"
-            className="bg-[#2a3942] text-[#e9edef] placeholder-[#8696a0] rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-[#25D366] transition-all"
-          />
-
-          <button
-            type="submit"
-            className="bg-[#25D366] text-[#111b21] font-semibold py-2 rounded-lg hover:bg-[#20ba5b] hover:scale-[1.02] transition-transform"
-          >
-            Sign In
-          </button>
+          {authError && <p className="text-red-500 text-center">{authError}</p>}
+          {formFields.map((field, index) => (
+            <input
+              type={field.type}
+              required
+              placeholder={field.placeholder}
+              ref={field.ref}
+              className="dark:bg-backgroundDark1 dark:text-white w-full mb-2 p-2 rounded-lg focus:outline-none"
+            />
+          ))}
+          <div className="w-full mt-2 ">
+            <button
+              type="submit"
+              className="w-full p-2 rounded-lg hover:scale-105 transition-transform focus:outline-none text-white bg-primary"
+            >
+              Sign In
+            </button>
+          </div>
         </form>
 
-        {/* Footer */}
-        <div className="text-sm text-[#8696a0] text-center">
-          Don't have an account?{" "}
-          <Link
-            to="/register"
-            className="text-[#25D366] hover:underline font-medium"
-          >
-            Sign Up
-          </Link>
+        <div>
+          <p className="text-center dark:text-slate-300">
+            Don't have an account!{" "}
+            <Link
+              className="text-primary cursor-pointer hover:underline"
+              to={"/register"}
+            >
+              Sign Up
+            </Link>
+            <br />
+            Crafted with ☕ by Ankit Kumar
+          </p>
         </div>
       </div>
     </div>
