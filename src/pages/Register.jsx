@@ -1,35 +1,14 @@
-import { RefObject, useRef } from "react";
-import { BiCoffee, BsFillChatRightTextFill } from "../assets";
+import React, { useRef } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { BsWhatsapp } from "react-icons/bs";
 
 export default function Register() {
   const emailRef = useRef();
   const usernameRef = useRef();
   const passwordRef = useRef();
-
-  // use the AuthHook for registration funciton
   const { register, authError } = useAuth();
 
-  const formFields = [
-    {
-      type: "email",
-      placeholder: "Enter your email",
-      ref: emailRef,
-    },
-    {
-      type: "text",
-      placeholder: "Enter your username",
-      ref: usernameRef,
-    },
-    {
-      type: "password",
-      placeholder: "Enter your password",
-      ref: passwordRef,
-    },
-  ];
-
-  // handle the user registration
   const handleFormSubmit = async (e) => {
     e.preventDefault();
     const user = {
@@ -37,64 +16,81 @@ export default function Register() {
       username: usernameRef.current.value,
       password: passwordRef.current.value,
     };
-
     await register(user);
   };
 
   return (
-    <div className="login w-full h-screen dark:bg-backgroundDark3 flex items-center justify-center">
-      <div className="l-wrapper w-[400px] flex items-center flex-col gap-5">
-        <div className="flex items-center gap-3">
-          <div className="text-primary">
-            <BsFillChatRightTextFill />
+    <div className="w-full h-screen flex items-center justify-center bg-[#e5ddd5] dark:bg-[#111b21]">
+      <div className="w-[400px] bg-white dark:bg-[#202c33] rounded-2xl shadow-xl p-8 flex flex-col items-center gap-6">
+        {/* Header */}
+        <div className="flex items-center gap-2">
+          <div className="text-[#25D366] text-3xl">
+            <BsWhatsapp />
           </div>
-          <h1 className="text-2xl font-bold dark:text-slate-200">ZenChat</h1>
+          <h1 className="text-2xl font-semibold text-[#25D366]">ZenChat</h1>
         </div>
 
-        <div className="flex flex-col items-center gap-1">
-          <h3 className="font-medium text-xl dark:text-slate-200">Sign Up</h3>
-          <p className="text-slate-400 dark:text-slate-300">
-            Welcome to zenchat, create an account
+        {/* Title */}
+        <div className="text-center">
+          <h3 className="text-xl font-medium text-[#111b21] dark:text-white">
+            Create Account
+          </h3>
+          <p className="text-gray-500 dark:text-gray-300">
+            Join ZenChat and start connecting instantly
           </p>
         </div>
 
+        {/* Form */}
         <form
           onSubmit={handleFormSubmit}
-          className="flex max-w-fit dark:bg-backgroundDark2 dark:text-white flex-col items-center  p-5 rounded-lg bg-slate-100 container-shadow "
+          className="w-full flex flex-col gap-3"
         >
-          {authError && <p className="text-red-500 text-center">{authError}</p>}
-          {formFields.map((field, index) => (
-            <input
-              type={field.type}
-              required
-              placeholder={field.placeholder}
-              ref={field.ref}
-              className="w-full dark:bg-backgroundDark1 mb-2 p-2 rounded-lg focus:outline-none"
-            />
-          ))}
-          <div className="w-full mt-2 ">
-            <button
-              type="submit"
-              className="w-full p-2 rounded-lg hover:scale-105 transition-transform focus:outline-none text-white bg-primary"
-            >
-              Sign Up
-            </button>
-          </div>
+          {authError && (
+            <p className="text-red-500 text-center text-sm">{authError}</p>
+          )}
+
+          <input
+            type="email"
+            placeholder="Email"
+            ref={emailRef}
+            required
+            className="p-3 rounded-lg bg-[#f0f2f5] dark:bg-[#2a3942] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#25D366]"
+          />
+
+          <input
+            type="text"
+            placeholder="Username"
+            ref={usernameRef}
+            required
+            className="p-3 rounded-lg bg-[#f0f2f5] dark:bg-[#2a3942] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#25D366]"
+          />
+
+          <input
+            type="password"
+            placeholder="Password"
+            ref={passwordRef}
+            required
+            className="p-3 rounded-lg bg-[#f0f2f5] dark:bg-[#2a3942] dark:text-white focus:outline-none focus:ring-2 focus:ring-[#25D366]"
+          />
+
+          <button
+            type="submit"
+            className="p-3 rounded-lg bg-[#25D366] text-white font-semibold hover:opacity-90 transition-opacity"
+          >
+            Sign Up
+          </button>
         </form>
 
-        <div>
-          <p className="text-center dark:text-slate-300">
-            Have an account already ?{" "}
-            <Link
-              className="text-primary cursor-pointer hover:underline"
-              to={"/login"}
-            >
-              Sign In
-            </Link>
-            <br />
-            Crafted with ☕ by Ankit Kumar
-          </p>
-        </div>
+        {/* Footer */}
+        <p className="text-sm text-gray-600 dark:text-gray-300 text-center">
+          Already have an account?{" "}
+          <Link
+            to="/login"
+            className="text-[#25D366] hover:underline font-medium"
+          >
+            Sign In
+          </Link>
+        </p>
       </div>
     </div>
   );
