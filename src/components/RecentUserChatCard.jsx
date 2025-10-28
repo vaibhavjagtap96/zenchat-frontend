@@ -10,9 +10,10 @@ export default function RecentUserChatCard({ chat, onClick, isActive }) {
     <div
       onClick={() => onClick(chat)}
       className={`flex gap-3 px-4 py-3 items-center cursor-pointer transition-all 
-        ${isActive
-          ? "bg-[#d9fdd3] dark:bg-[#005c4b]"
-          : "hover:bg-[#f5f6f6] dark:hover:bg-[#2a3942]"
+        ${
+          isActive
+            ? "bg-[#d9fdd3] dark:bg-[#005c4b]"
+            : "hover:bg-[#f5f6f6] dark:hover:bg-[#2a3942]"
         } border-b border-gray-200 dark:border-[#2a3942]`}
     >
       {/* 🖼 Avatar / Group Profile */}
@@ -39,7 +40,10 @@ export default function RecentUserChatCard({ chat, onClick, isActive }) {
       )}
 
       {/* 💬 Chat Details */}
-      <div className="flex-1 min-w-0 border-b border-gray-100 dark:border-[#2a3942] pb-1">
+      <div
+        className="flex-1 min-w-0 border-b border-gray-100 dark:border-[#2a3942] pb-1"
+        style={{ marginLeft: chat.isGroupChat ? "12px" : "0px" }} // ✅ Slight right shift for group names
+      >
         <div className="flex items-center justify-between">
           <p className="font-medium text-[15px] text-gray-900 dark:text-gray-100 truncate">
             {filteredChat.title}
@@ -56,7 +60,7 @@ export default function RecentUserChatCard({ chat, onClick, isActive }) {
             {limitChar(filteredChat.lastMessage, 28) || "No messages yet"}
           </p>
 
-          {/* Optional unread badge (activate when you have message count) */}
+          {/* Optional unread badge */}
           {/* <span className="text-xs bg-[#25D366] text-white rounded-full px-2 py-[1px] ml-2 shadow-sm">
             2
           </span> */}
