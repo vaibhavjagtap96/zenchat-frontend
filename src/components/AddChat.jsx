@@ -18,14 +18,13 @@ import {
 import { useChat } from "../context/ChatContext";
 import { requestHandler } from "../utils";
 
-export function AddChat({ open }) {
+export function AddChat() {
   const [isGroupChat, setIsGroupChat] = useState(false);
   const [groupName, setGroupName] = useState("");
   const [groupChatParticipants, setGroupChatParticipants] = useState([]);
   const [users, setUsers] = useState([]);
   const [creatingChat, setCreatingChat] = useState(false);
 
-  // context
   const {
     openAddChat,
     setOpenAddChat,
@@ -87,7 +86,8 @@ export function AddChat({ open }) {
 
   return (
     <Transition show={openAddChat} as={Fragment}>
-      <Dialog as="div" className="relative z-10" onClose={handleClose}>
+      <Dialog as="div" className="relative z-20" onClose={handleClose}>
+        {/* Overlay */}
         <TransitionChild
           as={Fragment}
           enter="ease-out duration-300"
@@ -97,172 +97,166 @@ export function AddChat({ open }) {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black/50 transition-opacity" />
+          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm transition-opacity" />
         </TransitionChild>
 
-        <div className="fixed inset-0 z-10 overflow-y-auto">
-          <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-            <TransitionChild
-              as={Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-              enterTo="opacity-100 translate-y-0 sm:scale-100"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100 translate-y-0 sm:scale-100"
-              leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-            >
-              <DialogPanel className="w-full relative transform overflow-hidden rounded-lg bg-white dark:bg-backgroundDark1 px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
-                <div className="sm:flex sm:items-start">
-                  <div className="w-full mt-3 text-center sm:mt-0 sm:text-left">
-                    <DialogTitle
-                      as="h3"
-                      className="text-lg leading-6 font-medium text-slate-500 dark:text-slate-50"
-                    >
-                      Create Chat
-                    </DialogTitle>
+        {/* Modal */}
+        <div className="fixed inset-0 z-20 flex items-center justify-center p-4 overflow-y-auto">
+          <TransitionChild
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0 scale-90"
+            enterTo="opacity-100 scale-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100 scale-100"
+            leaveTo="opacity-0 scale-90"
+          >
+            <DialogPanel className="w-full max-w-lg rounded-2xl bg-white shadow-2xl ring-1 ring-gray-200 text-gray-900 p-6 relative">
+              <DialogTitle
+                as="h3"
+                className="text-2xl font-semibold text-center mb-4 text-gray-800"
+              >
+                💬 Create New Chat
+              </DialogTitle>
 
-                    {/* Toggle */}
-                    <div className="mt-2 flex items-center gap-2">
-                      <Switch
-                        checked={isGroupChat}
-                        onChange={setIsGroupChat}
-                        className="group inline-flex h-6 w-11 items-center rounded-full bg-gray-400 transition data-[checked]:bg-primary"
+              {/* Toggle Group Chat */}
+              <div className="flex justify-center items-center gap-3 mb-6">
+                <Switch
+                  checked={isGroupChat}
+                  onChange={setIsGroupChat}
+                  className={`${
+                    isGroupChat ? "bg-blue-500" : "bg-gray-300"
+                  } relative inline-flex h-6 w-12 items-center rounded-full transition`}
+                >
+                  <span
+                    className={`${
+                      isGroupChat ? "translate-x-6" : "translate-x-1"
+                    } inline-block h-4 w-4 transform rounded-full bg-white shadow transition`}
+                  />
+                </Switch>
+                <span className="text-gray-600 text-sm">Enable Group Chat</span>
+              </div>
+
+              {/* One-to-One Chat */}
+              {!isGroupChat && (
+                <div className="text-center py-3">
+                  <p className="text-lg text-gray-700">
+                    Start chatting with{" "}
+                    <span className="font-semibold text-blue-600">
+                      {newChatUser?.username || "a user"}
+                    </span>
+                    ?
+                  </p>
+                </div>
+              )}
+
+              {/* Group Chat Section */}
+              {isGroupChat && (
+                <div className="space-y-3">
+                  <input
+                    type="text"
+                    className="w-full px-4 py-2 rounded-lg border border-gray-300 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    placeholder="Enter group name"
+                    value={groupName}
+                    onChange={(e) => setGroupName(e.target.value)}
+                  />
+
+                  {/* Search users */}
+                  <div className="flex items-center gap-2 bg-gray-100 border border-gray-300 rounded-lg px-3 py-2">
+                    <BiSearch className="text-gray-500 text-xl" />
+                    <input
+                      ref={searchUserRef}
+                      onKeyDown={(e) => e.key === "Enter" && handleSearchUser()}
+                      type="text"
+                      placeholder="Search users to add..."
+                      className="w-full bg-transparent outline-none text-gray-800 placeholder-gray-500"
+                    />
+                  </div>
+
+                  {/* Search Results */}
+                  <ul className="bg-gray-50 border border-gray-200 rounded-lg max-h-40 overflow-y-auto divide-y divide-gray-200 mt-2">
+                    {users.map((user) => (
+                      <li
+                        key={user._id}
+                        className="flex justify-between items-center py-2 px-3 hover:bg-gray-100 transition"
                       >
-                        <span className="size-4 translate-x-1 rounded-full bg-white transition group-data-[checked]:translate-x-6" />
-                      </Switch>
-                      <span className="dark:text-slate-300 text-slate-500">
-                        Enable group chat
-                      </span>
-                    </div>
-
-                    {/* One-to-one chat */}
-                    {!isGroupChat && (
-                      <div className="mt-3">
-                        <p className="text-lg font-medium dark:text-slate-50 text-slate-900">
-                          Create a chat with{" "}
-                          {newChatUser?.username || "selected user"}?
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Group chat */}
-                    {isGroupChat && (
-                      <div className="w-full mt-5">
-                        <input
-                          type="text"
-                          className="w-full px-3 py-2 rounded-md outline-none bg-backgroundDark3 text-slate-100"
-                          placeholder="Enter a group name"
-                          onChange={(e) => setGroupName(e.target.value)}
-                        />
-
-                        <div className="mt-2">
-                          <div className="w-full flex justify-between items-center rounded-md outline-none bg-backgroundDark3">
-                            <input
-                              type="text"
-                              className="w-[90%] px-3 py-2 rounded-md outline-none bg-transparent text-slate-100"
-                              placeholder="Add more users..."
-                              ref={searchUserRef}
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter") handleSearchUser();
-                              }}
-                            />
-                            <span
-                              className="text-slate-400 px-3 cursor-pointer"
-                              onClick={handleSearchUser}
-                            >
-                              <BiSearch className="size-5" />
-                            </span>
-                          </div>
-
-                          <ul className="dark:bg-backgroundDark3 rounded-md px-2 mt-1 max-h-[150px] overflow-auto">
-                            {users.map((user) => (
-                              <li
-                                key={user._id}
-                                className="dark:text-slate-100 flex justify-between items-center m-2"
-                              >
-                                <div className="flex items-center gap-2">
-                                  <img
-                                    className="w-10 h-10 rounded-full object-cover"
-                                    src={user.avatarUrl}
-                                    alt={user.username}
-                                  />
-                                  <span>{user.username}</span>
-                                </div>
-                                {!groupChatParticipants.some(
-                                  ({ _id }) => user._id === _id
-                                ) && (
-                                  <button
-                                    className="px-2 py-1 text-xs dark:text-white text-black bg-primary rounded-md hover:bg-primary_hover"
-                                    onClick={() =>
-                                      setGroupChatParticipants([
-                                        ...groupChatParticipants,
-                                        user,
-                                      ])
-                                    }
-                                  >
-                                    Add
-                                  </button>
-                                )}
-                              </li>
-                            ))}
-                          </ul>
-
-                          <div className="flex flex-wrap justify-center gap-1 mt-2">
-                            {groupChatParticipants.map((user) => (
-                              <div
-                                key={user._id}
-                                className="flex gap-[2px] dark:bg-backgroundDark2 p-2 rounded-full items-center"
-                              >
-                                <img
-                                  className="size-5 rounded-full object-cover"
-                                  src={profile2}
-                                  alt={user.username}
-                                />
-                                <span className="text-xs dark:text-slate-300">
-                                  {user.username}
-                                </span>
-                                <button
-                                  className="ml-1 text-white"
-                                  onClick={() =>
-                                    setGroupChatParticipants(
-                                      groupChatParticipants.filter(
-                                        ({ _id }) => user._id !== _id
-                                      )
-                                    )
-                                  }
-                                >
-                                  <RxCross2 />
-                                </button>
-                              </div>
-                            ))}
-                          </div>
+                        <div className="flex items-center gap-2">
+                          <img
+                            src={user.avatarUrl}
+                            alt={user.username}
+                            className="w-9 h-9 rounded-full object-cover"
+                          />
+                          <span className="text-gray-800">{user.username}</span>
                         </div>
+                        {!groupChatParticipants.some(
+                          ({ _id }) => user._id === _id
+                        ) && (
+                          <button
+                            className="px-3 py-1 text-xs bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                            onClick={() =>
+                              setGroupChatParticipants([
+                                ...groupChatParticipants,
+                                user,
+                              ])
+                            }
+                          >
+                            Add
+                          </button>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+
+                  {/* Selected Members */}
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {groupChatParticipants.map((user) => (
+                      <div
+                        key={user._id}
+                        className="flex items-center gap-1 bg-gray-200 px-3 py-1 rounded-full text-sm"
+                      >
+                        <img
+                          src={profile2}
+                          alt={user.username}
+                          className="w-5 h-5 rounded-full object-cover"
+                        />
+                        <span className="text-gray-800">{user.username}</span>
+                        <button
+                          onClick={() =>
+                            setGroupChatParticipants(
+                              groupChatParticipants.filter(
+                                ({ _id }) => user._id !== _id
+                              )
+                            )
+                          }
+                          className="ml-1 text-red-500 hover:text-red-600"
+                        >
+                          <RxCross2 />
+                        </button>
                       </div>
-                    )}
+                    ))}
                   </div>
                 </div>
+              )}
 
-                <div className="mt-5 flex items-center justify-end">
-                  <button
-                    type="button"
-                    className="rounded-md bg-backgroundDark2 px-4 py-2 text-base font-medium mx-2 text-white shadow-sm hover:bg-backgroundDark3"
-                    onClick={handleClose}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    className="rounded-md bg-blue-600 px-4 py-2 text-base font-medium mx-2 text-white shadow-sm hover:bg-blue-700"
-                    onClick={
-                      isGroupChat ? createNewGroupChat : createNewOneToOneChat
-                    }
-                  >
-                    Create
-                  </button>
-                </div>
-              </DialogPanel>
-            </TransitionChild>
-          </div>
+              {/* Buttons */}
+              <div className="mt-8 flex justify-end gap-3">
+                <button
+                  onClick={handleClose}
+                  className="px-4 py-2 rounded-md bg-gray-200 hover:bg-gray-300 text-sm font-medium text-gray-700"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={
+                    isGroupChat ? createNewGroupChat : createNewOneToOneChat
+                  }
+                  className="px-5 py-2 rounded-md bg-blue-500 hover:bg-blue-600 text-sm font-semibold text-white shadow-md"
+                >
+                  {creatingChat ? "Creating..." : "Create Chat"}
+                </button>
+              </div>
+            </DialogPanel>
+          </TransitionChild>
         </div>
       </Dialog>
     </Transition>
