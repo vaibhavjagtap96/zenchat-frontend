@@ -41,7 +41,7 @@ export default function RecentUserChatCard({ chat, onClick, isActive }) {
 
       {/* 💬 Chat Details */}
       <div
-        className="flex-1 min-w-0 border-b border-gray-100 dark:border-[#2a3942] pb-1"
+        className="flex-1 min-w-0 border-b border-gray-200 dark:border-[#2a3942] pb-1"
         style={{ marginLeft: chat.isGroupChat ? "12px" : "0px" }} // ✅ Slight right shift for group names
       >
         <div className="flex items-center justify-between">
