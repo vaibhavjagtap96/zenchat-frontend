@@ -5,7 +5,6 @@ import {
   BsThreeDotsVertical,
   FaFile,
   FiImage,
-  ImEnlarge2,
   IoMdAttach,
   IoMdSend,
   IoVideocamOutline,
@@ -42,16 +41,26 @@ const MessageCont = ({ isOwnMessage, message }) => {
     >
       <div
         className={`relative group rounded-2xl px-4 py-2 max-w-[80%] text-sm shadow-sm leading-relaxed break-words ${isOwnMessage
-            ? "bg-[#DCF8C6] dark:bg-green-800 text-black dark:text-white rounded-br-none"
-            : "bg-white/10 dark:bg-slate-800/60 text-black dark:text-white rounded-bl-none"
+          ? "bg-[#DCF8C6] dark:bg-green-800 text-black dark:text-white rounded-br-none"
+          : "bg-white dark:bg-slate-800/60 text-black dark:text-white rounded-bl-none"
           }`}
       >
+        {/* 
+      <div
+        className={`relative group rounded-2xl px-4 py-2 max-w-[80%] text-sm shadow-sm leading-relaxed break-words ${
+          isOwnMessage
+            ? "bg-[#DCF8C6] dark:bg-green-800 text-black dark:text-white rounded-br-none"
+            : "bg-white/10 dark:bg-slate-800/60 text-black dark:text-white rounded-bl-none"
+        }`}
+      > */}
         {/* Attachments */}
         {message.attachments?.length > 0 && (
           <div className="flex flex-wrap gap-3 mb-2">
             {message.attachments.map((file) => {
               const ext = file.url.split(".").pop().toLowerCase();
-              const isImage = ["jpg", "jpeg", "png", "webp", "gif"].includes(ext);
+              const isImage = ["jpg", "jpeg", "png", "webp", "gif"].includes(
+                ext
+              );
               return (
                 <div
                   key={file.url}
@@ -68,12 +77,12 @@ const MessageCont = ({ isOwnMessage, message }) => {
                     <div className="flex flex-col items-center justify-center border border-gray-300/20 dark:border-gray-700/40 rounded-xl h-32 text-gray-600 dark:text-gray-200 cursor-pointer hover:scale-105 transition-transform duration-200">
                       <FaFile className="text-3xl mb-2" />
                       <p className="text-xs truncate w-[90%] text-center">
-                        {limitChar(file.url.split('/').pop(), 12)}
+                        {limitChar(file.url.split("/").pop(), 12)}
                       </p>
                     </div>
                   )}
 
-                  {/* Floating Download Button */}
+                  {/* Download Button */}
                   <div className="absolute bottom-2 right-2 bg-black/60 hover:bg-black/80 backdrop-blur-md rounded-full p-2 cursor-pointer transition">
                     <PiDownloadSimpleBold
                       onClick={() => saveAs(file.url)}
@@ -109,11 +118,6 @@ const MessageCont = ({ isOwnMessage, message }) => {
                 className={`absolute ${isOwnMessage ? "left-6" : "right-6"
                   } top-0 bg-white dark:bg-[#2a3942] text-sm rounded-md shadow-lg border border-gray-300 dark:border-gray-600 p-2 z-50 animate-fadeIn`}
               >
-                {/* <div
-                className={`absolute ${
-                  isOwnMessage ? "left-6" : "right-6"
-                } top-0 bg-white/10 dark:bg-[#2a3942] text-sm rounded-md shadow-lg border border-gray-200/10 dark:border-gray-600/40 p-2 z-50 animate-fadeIn`}
-              > */}
                 <p
                   className="cursor-pointer text-gray-800 dark:text-gray-200 hover:text-green-500 mb-1"
                   onClick={() => {
@@ -123,7 +127,17 @@ const MessageCont = ({ isOwnMessage, message }) => {
                 >
                   Copy
                 </p>
-                {user._id === message?.sender?._id && (
+                <p
+                  className="cursor-pointer text-red-400 hover:text-red-500"
+                  onClick={() => {
+                    deleteChatMessage(message._id);
+                    setShowMenu(false);
+                  }}
+                >
+                  Delete
+                </p>
+
+                {/* {user._id === message?.sender?._id && (
                   <p
                     className="cursor-pointer text-red-400 hover:text-red-500"
                     onClick={() => {
@@ -133,7 +147,7 @@ const MessageCont = ({ isOwnMessage, message }) => {
                   >
                     Delete
                   </p>
-                )}
+                )} */}
               </div>
             )}
           </OutsideClickHandler>
@@ -187,9 +201,10 @@ export default function ChatsSection() {
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 bg-[#F0F2F5] dark:bg-[#1F2C34] shadow-md z-10">
         <div className="flex items-center gap-3">
+          {/* ✅ Fixed Back Arrow Visibility */}
           <MdArrowBackIos
             onClick={() => setIsChatSelected(false)}
-            className="text-gray-600 dark:text-white cursor-pointer text-xl md:hidden"
+            className="text-gray-600 dark:text-white cursor-pointer text-2xl  hidden md:block transition-opacity duration-200"
           />
           <img
             src={opponent?.avatarUrl}
@@ -245,7 +260,7 @@ export default function ChatsSection() {
         )}
       </div>
 
-      {/* Attachments Preview - Transparent minimal */}
+      {/* Attachments Preview */}
       {!!attachments.length && (
         <div className="px-4 py-2 flex flex-wrap gap-4 justify-start border-t border-gray-200/10 dark:border-gray-700">
           {attachments.map((file, i) => (
@@ -304,7 +319,7 @@ export default function ChatsSection() {
           className="flex-1 px-4 py-2.5 rounded-full bg-white/10 dark:bg-slate-700/50 text-sm text-gray-800 dark:text-white outline-none focus:ring-1 focus:ring-green-500"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && sendChatMessage()}
+          onKeyDown={(e) => e.key === "Enter" && sendChatMessage()}
         />
 
         <button
@@ -322,8 +337,16 @@ export default function ChatsSection() {
 /* Animation */
 <style jsx>{`
   @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-5px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(-5px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
-  .animate-fadeIn { animation: fadeIn 0.2s ease-out; }
-`}</style>
+  .animate-fadeIn {
+    animation: fadeIn 0.2s ease-out;
+  }
+`}</style>;
