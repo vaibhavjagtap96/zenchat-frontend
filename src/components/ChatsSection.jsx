@@ -157,7 +157,7 @@ const MessageCont = ({ isOwnMessage, isGroupChat, message }) => {
                     }}
                     className="mb-1 hover:text-slate-300"
                   >
-                    copy
+                    Copy
                   </p>
                   <p
                     onClick={() => deleteChatMessage(message._id)}
@@ -230,7 +230,7 @@ export default function ChatsSection() {
   return (
     <div className="overflow-y-hidden bg-[#ECE5DD] dark:bg-[#0B141A] transition-colors duration-300">
       {/* Header Section */}
-      <div className="flex w-full items-center justify-between p-5 md:p-4 bg-white dark:bg-[#1E2A30] shadow-md transition-colors duration-300">
+      <div className="flex w-full items-center justify-between p-5 md:p-4 bg-[#F0F2F5] dark:bg-[#202C33] shadow-md transition-colors duration-300">
         <div className="flex gap-3 items-center">
           <div onClick={() => setIsChatSelected(false)}>
             <MdArrowBackIos className="hidden md:block text-gray-700 dark:text-white text-2xl" />
@@ -348,7 +348,7 @@ export default function ChatsSection() {
       )}
 
       {/* Message Input */}
-      <div className="h-[90px] md:h-auto border-t border-[#ccc] dark:border-[#2A3942] bg-[#F0F2F5] dark:bg-[#202C33] w-full flex items-center justify-between p-4 md:p-2">
+      <div className="h-[90px] md:h-auto border-t border-[#ccc] dark:border-[#2A3942] bg-[#F0F2F5] dark:bg-[#202C33] w-full flex items-center justify-between p-4 md:p-2 transition-colors duration-300">
         <div className="flex-1 mr-4 md:mr-2">
           <input
             type="text"
@@ -372,7 +372,6 @@ export default function ChatsSection() {
               accept="image/*"
               id="imageAttach"
               hidden
-              value=""
               multiple
               onChange={(e) => setAttachments([...e.target.files])}
             />
@@ -386,7 +385,6 @@ export default function ChatsSection() {
               type="file"
               id="fileAttach"
               hidden
-              value=""
               multiple
               onChange={(e) => setAttachments([...e.target.files])}
             />
