@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import { saveAs } from "file-saver";
+import mime from "mime-types";
 import {
   BiSearch,
   BsThreeDotsVertical,
   FaFile,
   FiImage,
+  ImEnlarge2,
   IoMdAttach,
   IoMdSend,
   IoVideocamOutline,
@@ -22,120 +24,157 @@ import OutsideClickHandler from "react-outside-click-handler";
 import { useConnectWebRtc } from "../context/WebRtcContext";
 import ViewImage from "./ViewImage";
 
-const MessageCont = ({ isOwnMessage, message }) => {
+const MessageCont = ({ isOwnMessage, isGroupChat, message }) => {
   const { deleteChatMessage } = useChat();
-  const [showMenu, setShowMenu] = useState(false);
+  const [showMessageMenu, setShowMessageMenu] = useState(false);
   const [isOpenView, setIsOpenView] = useState(false);
-  const [imageUrl, setImageUrl] = useState("");
+  const [currentImageUrl, setCurrentImageUrl] = useState("");
   const { user } = useAuth();
 
-  const handleImageClick = (url) => {
-    setImageUrl(url);
+  const handleEnlargeClick = (url) => {
+    setCurrentImageUrl(url);
     setIsOpenView(true);
   };
-
   return (
-    <div
-      className={`relative flex w-full my-2 ${
-        isOwnMessage ? "justify-end" : "justify-start"
-      }`}
-    >
+    <div className={`w-auto flex my-2 `}>
       <div
-        className={`relative group rounded-2xl px-4 py-2 max-w-[80%] text-sm shadow-sm leading-relaxed break-words ${
-          isOwnMessage
-            ? "bg-[#DCF8C6] dark:bg-green-800 text-black dark:text-white rounded-br-none"
-            : "bg-white dark:bg-slate-800/60 text-black dark:text-white rounded-bl-none"
+        className={`flex  ${
+          isOwnMessage ? "max-w-[50%] md:max-w-[85%] ml-auto " : "mr-auto"
         }`}
       >
-        {message.attachments?.length > 0 && (
-          <div className="flex flex-wrap gap-3 mb-2">
-            {message.attachments.map((file) => {
-              const ext = file.url.split(".").pop().toLowerCase();
-              const isImage = ["jpg", "jpeg", "png", "webp", "gif"].includes(ext);
-              return (
-                <div
-                  key={file.url}
-                  className="relative rounded-xl overflow-hidden group"
-                  style={{ width: "150px" }}
-                >
-                  {isImage ? (
-                    <img
-                      src={file.url}
-                      onClick={() => handleImageClick(file.url)}
-                      className="w-full h-32 object-cover cursor-pointer hover:scale-105 transition-transform duration-200 rounded-xl"
-                    />
-                  ) : (
-                    <div className="flex flex-col items-center justify-center border border-gray-300/20 dark:border-gray-700/40 rounded-xl h-32 text-gray-600 dark:text-gray-200 cursor-pointer hover:scale-105 transition-transform duration-200">
-                      <FaFile className="text-3xl mb-2" />
-                      <p className="text-xs truncate w-[90%] text-center">
-                        {limitChar(file.url.split("/").pop(), 12)}
-                      </p>
+        <div
+          className={`flex flex-col  justify-center relative dark:bg-opacity-20 dark:bg-primary min-w-[120px] max-w-full bg-backgroundLight3  p-2 md:p-1 rounded-xl ${
+            isOwnMessage ? "rounded-br-none" : "rounded-bl-none"
+          } mb-5 ${isOwnMessage ? "order-2" : "order-1"}`}
+        >
+          {message.attachments?.length ? (
+            <div className="flex gap-1 flex-wrap">
+              {message.attachments?.map((file) => (
+                <div className="flex flex-col">
+                  <div>
+                    {(() => {
+                      const fileExtension = file.url
+                        .split("/")
+                        .pop()
+                        .toLowerCase()
+                        .split(".")
+                        .pop();
+                      const isImage = [
+                        "jpg",
+                        "jpeg",
+                        "png",
+                        "webp",
+                        "gif",
+                        "svg",
+                      ].includes(fileExtension);
+
+                      if (isImage) {
+                        return (
+                          <img
+                            src={file.url}
+                            loading="lazy"
+                            className={`${
+                              message.attachments?.length > 1
+                                ? "size-44"
+                                : "size-72 md:size-60"
+                            } object-cover rounded-md`}
+                          />
+                        );
+                      } else {
+                        return (
+                          <div className="flex flex-col items-center justify-center">
+                            <FaFile className="text-3xl text-slate-400" />
+                            <p>
+                              {limitChar(file.url.split("/").pop(), 10)}.
+                              {fileExtension}
+                            </p>
+                          </div>
+                        );
+                      }
+                    })()}
+
+                    {isOpenView && (
+                      <ViewImage
+                        openView={isOpenView}
+                        setOpenView={setIsOpenView}
+                        imageUrl={currentImageUrl}
+                      />
+                    )}
+                  </div>
+                  <div className="flex justify-between items-center mt-3 rounded-sm">
+                    <div
+                      className="cursor-pointer"
+                      onClick={() => handleEnlargeClick(file.url)}
+                    >
+                      <ImEnlarge2 className="dark:text-text_light_primary" />
                     </div>
-                  )}
-                  <div className="absolute bottom-2 right-2 bg-black/60 hover:bg-black/80 backdrop-blur-md rounded-full p-2 cursor-pointer transition">
-                    <PiDownloadSimpleBold
-                      onClick={() => saveAs(file.url)}
-                      className="text-white text-sm"
-                    />
+                    <div
+                      className="cursor-pointer"
+                      onClick={() => {
+                        saveAs(file.url, file.url.split("/").slice(-1));
+                      }}
+                    >
+                      <PiDownloadSimpleBold className="text-xl dark:text-text_light_primary" />
+                    </div>
                   </div>
                 </div>
-              );
-            })}
+              ))}
+            </div>
+          ) : (
+            ""
+          )}
+          <p className="p-2 md:p-2 text-base md:text-md text-slate-900 dark:text-slate-100 ">
+            {message.content}
+          </p>
+
+          <div className="flex items-center gap-1 text-xs text-slate-400 absolute bottom-0 right-1 ">
+            {/* <span>
+              <LuClock3 />
+            </span> */}
+            <span className="text-[10px]">
+              {moment(message.createdAt)
+                .add("TIME_ZONE", "hours")
+                .fromNow(true)}{" "}
+              ago
+            </span>
           </div>
-        )}
-
-        {message.content && <p className="text-[15px]">{message.content}</p>}
-
-        <div className="flex justify-end text-[11px] text-gray-500 dark:text-gray-300 mt-1">
-          {moment(message.createdAt).fromNow(true)} ago
         </div>
-
         <div
-          className={`absolute top-1 ${
-            isOwnMessage ? "-left-6" : "-right-6"
-          } text-gray-500 dark:text-gray-300`}
+          className={`mx-3 md:mx-0 ${isOwnMessage ? "order-1" : "order-2"} `}
         >
-          <OutsideClickHandler onOutsideClick={() => setShowMenu(false)}>
-            <BsThreeDotsVertical
-              className="cursor-pointer hover:text-gray-700 dark:hover:text-white text-lg"
-              onClick={() => setShowMenu((prev) => !prev)}
-            />
-            {showMenu && (
-              <div
-                className={`absolute ${
-                  isOwnMessage ? "left-6" : "right-6"
-                } top-0 bg-white dark:bg-[#2a3942] text-sm rounded-md shadow-lg border border-gray-300 dark:border-gray-600 p-2 z-50 animate-fadeIn`}
-              >
-                <p
-                  className="cursor-pointer text-gray-800 dark:text-gray-200 hover:text-green-500 mb-1"
-                  onClick={() => {
-                    navigator.clipboard.writeText(message.content);
-                    setShowMenu(false);
-                  }}
-                >
-                  Copy
-                </p>
-                <p
-                  className="cursor-pointer text-red-400 hover:text-red-500"
-                  onClick={() => {
-                    deleteChatMessage(message._id);
-                    setShowMenu(false);
-                  }}
-                >
-                  Delete
-                </p>
-              </div>
-            )}
-          </OutsideClickHandler>
+          <div className=" relative cursor-pointer text-md text-slate-500 hover:text-slate-800 dark:hover:text-slate-300">
+            <OutsideClickHandler
+              onOutsideClick={() => setShowMessageMenu(false)}
+            >
+              <BsThreeDotsVertical
+                onClick={() => setShowMessageMenu(!showMessageMenu)}
+              />
+              {showMessageMenu ? (
+                <div className="text-slate-100 bg-text_dark_secondary p-2 text-sm rounded-md absolute top-0 -left-14">
+                  <p
+                    onClick={() => {
+                      navigator.clipboard.writeText(message.content);
+                      setShowMessageMenu(false);
+                    }}
+                    className=" mb-1 hover:text-slate-300"
+                  >
+                    copy
+                  </p>
+                  <p
+                    onClick={() => deleteChatMessage(message._id)}
+                    className={`text-red-400 hover:text-red-500 ${
+                      user._id !== message?.sender._id && "hidden"
+                    }`}
+                  >
+                    Delete
+                  </p>
+                </div>
+              ) : (
+                ""
+              )}
+            </OutsideClickHandler>
+          </div>
         </div>
-
-        {isOpenView && (
-          <ViewImage
-            openView={isOpenView}
-            setOpenView={setIsOpenView}
-            imageUrl={imageUrl}
-          />
-        )}
       </div>
     </div>
   );
@@ -156,174 +195,227 @@ export default function ChatsSection() {
     setIsChatSelected,
   } = useChat();
   const { user } = useAuth();
-  const opponent = getOpponentParticipant(
+
+  const opponentParticipant = getOpponentParticipant(
     currentSelectedChat.current?.participants,
     user._id
   );
-  const scrollRef = useRef();
+
+  const opponentUsername = opponentParticipant?.username;
+  const opponentProfilePictureUrl = opponentParticipant?.avatarUrl;
+
+  const scrollToBottomRef = new useRef();
+
+  const scrollToBottom = () => {
+    scrollToBottomRef.current?.scrollIntoView();
+  };
+
   const { handleCall, setTargetUserId, targetUserId } = useConnectWebRtc();
 
-  useEffect(() => {
-    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  const handleCallButtonClick = async () => {
+    if (opponentParticipant?._id) {
+      setTargetUserId(opponentParticipant?._id);
+    }
+  };
 
+  // handle call only if the target user id is available
   useEffect(() => {
-    if (targetUserId) handleCall();
+    if (targetUserId) {
+      handleCall();
+    }
   }, [targetUserId]);
 
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
   return (
-    <div className="flex flex-col h-[100dvh] w-full bg-[#ECE5DD] dark:bg-[#121B22] transition-colors duration-300 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 bg-[#F0F2F5] dark:bg-[#1F2C34] shadow-md z-10">
-        <div className="flex items-center gap-3">
-          <MdArrowBackIos
-            onClick={() => setIsChatSelected(false)}
-            className="text-gray-600 dark:text-white cursor-pointer text-2xl md:hidden transition-opacity duration-200"
-          />
-          <img
-            src={opponent?.avatarUrl}
+    <div className="overflow-y-hidden">
+      <div className="flex w-full items-center justify-between p-5 md:p-4 shadow-md md:shadow-xl ">
+        <div className="flex gap-3 items-center ">
+          <div onClick={() => setIsChatSelected(false)}>
+            {" "}
+            <MdArrowBackIos className="hidden md:block dark:text-white text-2xl" />{" "}
+          </div>
+          {currentSelectedChat.current.isGroupChat ? (
+            <div className="w-10 relative h-10 flex-shrink-0 flex justify-start items-center flex-nowrap mr-3">
+              {currentSelectedChat.current.participants
+                .slice(0, 3)
+                .map((participant, i) => {
+                  return (
+                    <img
+                      key={participant._id}
+                      src={participant.avatarUrl}
+                      className={`w-10 h-10  border-white rounded-full absolute outline outline-3 outline-black ${
+                        i === 0
+                          ? "left-0 z-30"
+                          : i === 1
+                          ? "left-2 z-20"
+                          : i === 2
+                          ? "left-4 z-10"
+                          : ""
+                      }`}
+                    />
+                  );
+                })}
+            </div>
+          ) : (
+            <img
+              className="size-10 rounded-full object-cover"
+              src={opponentProfilePictureUrl}
+              alt=""
+              loading="lazy"
+            />
+          )}
+
+          {/* <img
+            className="size-12 rounded-full object-cover"
+            src={opponentProfilePictureUrl}
             alt=""
-            className="w-10 h-10 rounded-full object-cover"
-          />
-          <h3 className="font-medium text-lg text-gray-800 dark:text-gray-100 truncate">
+          /> */}
+          <h3 className="font-medium text-xl md:text-md text-slate-800 dark:text-white">
             {currentSelectedChat.current?.isGroupChat
               ? currentSelectedChat.current.name
-              : opponent?.username}
+              : opponentUsername}
           </h3>
         </div>
-        <div className="flex gap-4 text-gray-600 dark:text-gray-300 text-xl">
-          <BiSearch className="cursor-pointer" />
-          {!currentSelectedChat.current?.isGroupChat && (
-            <IoVideocamOutline
-              className="cursor-pointer"
-              onClick={() => setTargetUserId(opponent?._id)}
-            />
-          )}
-          {currentSelectedChat.current?.admin?.toString() === user._id && (
-            <MdDeleteOutline
-              onClick={() => deleteUserChat(currentSelectedChat.current?._id)}
-              className="text-red-500 cursor-pointer"
-            />
-          )}
+
+        <div className="text-xl flex gap-5 text-slate-800 dark:text-slate-100 ">
+          <div className="cursor-pointer">
+            <BiSearch />
+          </div>
+          {/* <div className="cursor-pointer">
+            <IoCallOutline />
+          </div>
+        */}
+          <div className="cursor-pointer">
+            {!currentSelectedChat.current?.isGroupChat && (
+              <IoVideocamOutline onClick={handleCallButtonClick} />
+            )}
+          </div>
+          <div className="cursor-pointer text-red-500">
+            {currentSelectedChat.current?.admin.toString() === user._id ? (
+              <MdDeleteOutline
+                onClick={() => deleteUserChat(currentSelectedChat.current?._id)}
+              />
+            ) : (
+              ""
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Chat Body */}
-      <div className="flex flex-col flex-1 justify-between overflow-hidden">
-        <div className="flex-1 overflow-y-auto px-5 py-3 scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600">
-          {loadingMessages ? (
-            <div className="flex items-center justify-center h-full">
-              <Loading />
-            </div>
-          ) : messages?.length ? (
-            <>
-              {messages.map((msg) => (
-                <MessageCont
-                  key={msg._id}
-                  isOwnMessage={msg.sender?._id === user?._id}
-                  message={msg}
+      <div className="chat-msg-cont relative overflow-auto px-4 md:px-2 w-full h-[calc(100vh-180px)] md:h-[calc(100vh-260px)] ">
+        {loadingMessages ? (
+          <div className=" h-full w-full flex items-center justify-center">
+            <Loading />
+          </div>
+        ) : !messages?.length ? (
+          <div className="h-full w-full flex items-center justify-center">
+            <h1 className="text-2xl text-slate-400 dark:text-slate-500">
+              No Messages Yet...
+            </h1>
+          </div>
+        ) : (
+          <>
+            {messages?.map((msg) => (
+              <MessageCont
+                key={msg._id}
+                isOwnMessage={msg.sender?._id === user?._id}
+                isGroupChatMessage={currentSelectedChat.current?.isGroupChat}
+                message={msg}
+              />
+            ))}
+            <div ref={scrollToBottomRef} />
+          </>
+        )}
+      </div>
+      {!!attachments.length && (
+        <div className="showAttachmentFiles absolute bottom-24  grid grid-cols-5 gap-2 ">
+          {attachments?.map((file, index) => (
+            <div
+              key={index}
+              className="px-2 bg-slate-900 bg-opacity-50 rounded-md flex flex-col items-center"
+            >
+              <div className="text-red-500 w-full ">
+                <RxCross2
+                  className="float-right text-2xl cursor-pointer"
+                  onClick={() => removeFileFromAttachments(index)}
                 />
-              ))}
-              <div ref={scrollRef}></div>
-            </>
-          ) : (
-            <div className="flex items-center justify-center h-full">
-              <p className="text-gray-400 dark:text-gray-500 text-sm">
-                No Messages Yet...
-              </p>
+              </div>
+              {file.type.startsWith("image/") ? (
+                <img
+                  className="w-full h-auto object-cover"
+                  src={URL.createObjectURL(file)}
+                  alt=""
+                />
+              ) : (
+                <div className="flex flex-col gap-2 my-5 items-center">
+                  <FaFile className="text-3xl text-white" />
+                  <p className="text-xs text-slate-400 dark:text-white">
+                    {file.name}
+                  </p>
+                </div>
+              )}
             </div>
-          )}
+          ))}
+        </div>
+      )}
+      <div className="h-[90px] md:h-auto border-t shadow-xl dark:border-slate-500 light-upper-cont-shadow dark:dark-upper-cont-shadow bg-slate w-full flex items-center justify-between p-4 md:p-2 ">
+        <div className="flex-1 mr-4 md:mr-2 ">
+          <input
+            type="text"
+            placeholder="Enter Message..."
+            className="w-full h-full px-4 py-2 md:p-2 md:text-sm rounded-lg dark:bg-slate-600 border border-transparent bg-backgroundLight3 focus:outline-none dark:text-white text-black "
+            onKeyDown={(e) => {
+              if (e.key === "Enter") sendChatMessage();
+            }}
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+          />
         </div>
 
-        {/* Attachments + Input Bar */}
-        <div className="bg-[#F0F2F5] dark:bg-[#1F2C34] px-4 py-3 border-t dark:border-gray-700">
-          {!!attachments.length && (
-            <div className="flex flex-wrap gap-4 justify-start mb-3">
-              {attachments.map((file, i) => (
-                <div key={i} className="relative rounded-xl w-[120px]">
-                  <RxCross2
-                    className="absolute top-1 right-1 text-red-500 cursor-pointer text-sm z-10"
-                    onClick={() => removeFileFromAttachments(i)}
-                  />
-                  {file.type.startsWith("image/") ? (
-                    <img
-                      src={URL.createObjectURL(file)}
-                      alt=""
-                      className="w-full h-24 rounded-xl object-cover"
-                    />
-                  ) : (
-                    <div className="flex flex-col items-center justify-center border border-gray-400/20 dark:border-gray-600/30 rounded-xl h-24 text-gray-600 dark:text-gray-100">
-                      <FaFile className="text-2xl mb-1" />
-                      <p className="text-xs truncate w-full text-center">
-                        {file.name}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-
-          <div className="flex items-center gap-3">
+        <div className="flex items-center space-x-4 md:space-x-2">
+          <div>
             <label htmlFor="imageAttach" className="cursor-pointer">
-              <FiImage className="text-green-600 dark:text-green-400 text-2xl" />
+              <FiImage className="text-primary text-2xl md:text-md hover:text-primary_hover" />
             </label>
             <input
               type="file"
-              id="imageAttach"
               accept="image/*"
+              id="imageAttach"
               hidden
+              value=""
+              max={5}
               multiple
               onChange={(e) => setAttachments([...e.target.files])}
             />
-
+          </div>
+          {/* // future version  */}
+          <div>
             <label htmlFor="fileAttach" className="cursor-pointer">
-              <IoMdAttach className="text-green-600 dark:text-green-400 text-2xl" />
+              <IoMdAttach className="text-primary text-xl hover:text-primary_hover" />
             </label>
             <input
               type="file"
               id="fileAttach"
               hidden
+              value=""
+              max={5}
               multiple
               onChange={(e) => setAttachments([...e.target.files])}
             />
-
-            <input
-              type="text"
-              placeholder="Type a message..."
-              className="flex-1 px-4 py-2.5 rounded-full bg-white/10 dark:bg-slate-700/50 text-sm text-gray-800 dark:text-white outline-none focus:ring-1 focus:ring-green-500"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && sendChatMessage()}
-            />
-
-            <button
-              disabled={!message && !attachments.length}
-              onClick={sendChatMessage}
-              className="bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-400 rounded-full p-3 text-white transition active:scale-95"
-            >
-              <IoMdSend className="text-xl" />
-            </button>
           </div>
+
+          <button
+            disabled={!message && !attachments.length}
+            onClick={sendChatMessage}
+            className="bg-primary hover:bg-primary_hover transition-colors px-4 py-2 md:px-3 md:py-1 rounded-lg text-white"
+          >
+            <IoMdSend className="text-xl" />
+          </button>
         </div>
       </div>
     </div>
   );
 }
-
-/* Animations */
-<style jsx>{`
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(-5px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  .animate-fadeIn {
-    animation: fadeIn 0.2s ease-out;
-  }
-`}</style>;
